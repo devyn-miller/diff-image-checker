@@ -2,9 +2,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import { saveAs } from 'file-saver';
 import HeatmapLegend from './HeatmapLegend';
 
-export default function DifferenceReport({ diffData }) {
+export default function DifferenceReport({ diffData, setSensitivity }) {
   const heatmapCanvasRef = useRef(null);
   const [showLogic, setShowLogic] = useState(false);
+  const [currentSensitivity, setCurrentSensitivity] = useState(0); // Default sensitivity set to 0
 
   useEffect(() => {
     if (diffData && heatmapCanvasRef.current) {
@@ -14,11 +15,9 @@ export default function DifferenceReport({ diffData }) {
       const width = diffData.width;
       const height = diffData.height;
       
-      // Set canvas dimensions
       canvas.width = width;
       canvas.height = height;
       
-      // Create ImageData with correct dimensions
       const imageData = new ImageData(
         diffData.heatmapData,
         width,
@@ -38,7 +37,7 @@ export default function DifferenceReport({ diffData }) {
       Similar Pixels: ${diffData.similarPixels}
       Different Pixels: ${diffData.totalPixels - diffData.similarPixels}
     `;
-
+    
     const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, 'image_comparison_report.txt');
   };
@@ -54,6 +53,24 @@ export default function DifferenceReport({ diffData }) {
       <div className="mb-4">
         <h3 className="text-lg font-semibold mb-2">Color Difference Heatmap</h3>
         <canvas ref={heatmapCanvasRef} className="border" />
+      </div>
+
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold mb-2">Sensitivity Adjustment</h3>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={currentSensitivity}
+          onChange={(e) => {
+            const newSensitivity = parseFloat(e.target.value); // Convert to float
+            setCurrentSensitivity(newSensitivity);
+            setSensitivity(newSensitivity); // Update sensitivity in parent
+          }}
+          className="w-full"
+        />
+        <p className="text-sm">Sensitivity: {currentSensitivity}</p>
       </div>
 
       <span
@@ -73,20 +90,26 @@ export default function DifferenceReport({ diffData }) {
             Similarity Percentage = (Total Similarity Score / Total Pixels) * 100
           </p>
           <p>
-            Each pixel pair is assigned a similarity score between 0 and 1:
+            Each pixel pair is assigned a similarity score between 0 and 1 based on the sensitivity setting:
           </p>
           <p className="font-bold">
             Similarity Score = 1 - (Color Difference / Maximum Color Difference)
+          </p>
+          <p>
+            The threshold for determining similar pixels is adjusted by the sensitivity:
+          </p>
+          <p className="font-bold">
+            If Similarity Score >= (0.5 - Sensitivity)
           </p>
           <p>Where:</p>
           <ul className="list-disc list-inside">
             <li><strong>Color Difference:</strong> Calculated using the Euclidean distance between the RGB values of the two pixels.</li>
             <li><strong>Maximum Color Difference:</strong> The maximum possible distance between two colors in RGB space, approximately 441.67.</li>
+            <li><strong>Sensitivity:</strong> Adjusts the threshold for determining similar pixels. Higher sensitivity means more pixels are more likely to be considered different.</li>
           </ul>
         </div>
       )}
-
-      {/* Separate div for the Download Report button to ensure it is on a new line */}
+      
       <div className="mt-4">
         <button
           onClick={handleDownloadReport}

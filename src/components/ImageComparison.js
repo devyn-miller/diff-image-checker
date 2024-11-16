@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import HeatmapLegend from './HeatmapLegend';
 
-export default function ImageComparison({ image1, image2, setDiffData }) {
+export default function ImageComparison({ image1, image2, setDiffData, sensitivity }) {
   const canvasRef = useRef(null);
   const [similarity, setSimilarity] = useState(null);
   const [warning, setWarning] = useState('');
@@ -31,10 +31,9 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
       ctx.drawImage(img2, 0, 0, width, height);
       const imageData2 = ctx.getImageData(0, 0, width, height);
 
-      const { diffImageData, similarPixels, heatmapData, similarityPercentage } = compareImageData(imageData1, imageData2);
+      const { diffImageData, similarPixels, heatmapData, similarityPercentage } = compareImageData(imageData1, imageData2, sensitivity);
 
       ctx.putImageData(diffImageData, 0, 0);
-
       setSimilarity(similarityPercentage);
 
       setDiffData({ 
@@ -51,7 +50,7 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
     if (image1 && image2) {
       compareImages();
     }
-  }, [image1, image2, setDiffData]);
+  }, [image1, image2, sensitivity, setDiffData]);
 
   const loadImage = (src) => {
     return new Promise((resolve) => {
@@ -61,7 +60,7 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
     });
   };
 
-  const compareImageData = (imageData1, imageData2) => {
+  const compareImageData = (imageData1, imageData2, sensitivity) => {
     const width = imageData1.width;
     const height = imageData1.height;
 
@@ -86,7 +85,7 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
       const similarityScore = 1 - (colorDiff / maxColorDiff);
       totalSimilarityScore += similarityScore;
 
-      if (similarityScore >= 0.5) {
+      if (similarityScore >= (0.5 - sensitivity)) {
         similarPixels++;
         diffImageData.data[i] = r1;
         diffImageData.data[i + 1] = g1;
@@ -109,8 +108,7 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
       }
     }
 
-    const totalPixels = width * height;
-    const similarityPercentage = (totalSimilarityScore / totalPixels) * 100;
+    const similarityPercentage = (totalSimilarityScore / (width * height)) * 100;
 
     return { 
       diffImageData, 

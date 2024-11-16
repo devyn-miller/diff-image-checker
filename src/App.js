@@ -8,6 +8,7 @@ export default function App() {
   const [image1, setImage1] = useState(null);
   const [image2, setImage2] = useState(null);
   const [diffData, setDiffData] = useState(null);
+  const [sensitivity, setSensitivity] = useState(0.5);
   const [isLoading, setIsLoading] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
@@ -40,8 +41,8 @@ export default function App() {
       )}
       <main className="flex-grow flex flex-col items-center justify-center">
         <ImageUploader setImage1={setImage1} setImage2={setImage2} />
-        <ImageComparison image1={image1} image2={image2} setDiffData={setDiffData} />
-        {diffData && <DifferenceReport diffData={diffData} />}
+        <ImageComparison image1={image1} image2={image2} setDiffData={setDiffData} sensitivity={sensitivity} />
+        {diffData && <DifferenceReport diffData={diffData} setSensitivity={setSensitivity} />}
       </main>
       <footer className="bg-blue-600 text-white p-4 text-center">
         <p>&copy; {new Date().getFullYear()} DiffPixel. All rights reserved.</p>
