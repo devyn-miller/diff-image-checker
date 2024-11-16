@@ -54,7 +54,6 @@ export default function DifferenceReport({ diffData }) {
         <h3 className="text-lg font-semibold mb-2">Color Difference Heatmap</h3>
         <canvas ref={heatmapCanvasRef} className="border" />
       </div>
-      <HeatmapLegend />
       <button
         onClick={handleDownloadReport}
         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
