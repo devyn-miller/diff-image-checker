@@ -9,13 +9,21 @@ export default function DifferenceReport({ diffData }) {
     if (diffData && heatmapCanvasRef.current) {
       const canvas = heatmapCanvasRef.current;
       const ctx = canvas.getContext('2d');
+      
+      const width = diffData.width;
+      const height = diffData.height;
+      
+      // Set canvas dimensions
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Create ImageData with correct dimensions
       const imageData = new ImageData(
         diffData.heatmapData,
-        Math.sqrt(diffData.totalPixels),
-        Math.sqrt(diffData.totalPixels)
+        width,
+        height
       );
-      canvas.width = Math.sqrt(diffData.totalPixels);
-      canvas.height = Math.sqrt(diffData.totalPixels);
+      
       ctx.putImageData(imageData, 0, 0);
     }
   }, [diffData]);

@@ -43,7 +43,9 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
         heatmapData,
         similarityPercentage: similarityPercentage.toFixed(2),
         totalPixels,
-        similarPixels
+        similarPixels,
+        width,
+        height
       });
     };
 
@@ -61,8 +63,18 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
   };
 
   const compareImageData = (imageData1, imageData2) => {
-    const diffImageData = new ImageData(imageData1.width, imageData1.height);
-    const heatmapData = new Uint8ClampedArray(imageData1.width * imageData1.height * 4);
+    const width = imageData1.width;
+    const height = imageData1.height;
+    
+    // Create properly initialized ImageData objects with empty data arrays
+    const diffImageData = new ImageData(
+      new Uint8ClampedArray(width * height * 4),
+      width,
+      height
+    );
+    
+    // Create a separate array for heatmap data
+    const heatmapDataArray = new Uint8ClampedArray(width * height * 4);
     let similarPixels = 0;
 
     for (let i = 0; i < imageData1.data.length; i += 4) {
@@ -90,15 +102,19 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
         diffImageData.data[i + 3] = 128;
       }
 
-      // Heatmap data
+      // Populate heatmap data array
       const heatValue = Math.min(255, colorDiff);
-      heatmapData[i] = heatValue;
-      heatmapData[i + 1] = 0;
-      heatmapData[i + 2] = 255 - heatValue;
-      heatmapData[i + 3] = 255;
+      heatmapDataArray[i] = heatValue;
+      heatmapDataArray[i + 1] = 0;
+      heatmapDataArray[i + 2] = 255 - heatValue;
+      heatmapDataArray[i + 3] = 255;
     }
 
-    return { diffImageData, similarPixels, heatmapData };
+    return { 
+      diffImageData, 
+      similarPixels, 
+      heatmapData: heatmapDataArray 
+    };
   };
 
   return (
