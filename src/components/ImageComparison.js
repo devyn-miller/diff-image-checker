@@ -65,17 +65,11 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
   const compareImageData = (imageData1, imageData2) => {
     const width = imageData1.width;
     const height = imageData1.height;
-    
-    // Create properly initialized ImageData objects with empty data arrays
-    const diffImageData = new ImageData(
-      new Uint8ClampedArray(width * height * 4),
-      width,
-      height
-    );
-    
-    // Create a separate array for heatmap data
+
+    const diffImageData = new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
     const heatmapDataArray = new Uint8ClampedArray(width * height * 4);
     let similarPixels = 0;
+    const similarityThreshold = 50; // Adjust this threshold as needed
 
     for (let i = 0; i < imageData1.data.length; i += 4) {
       const r1 = imageData1.data[i];
@@ -89,25 +83,29 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
         Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)
       );
 
-      if (colorDiff === 0) {
+      const pixelSimilarity = Math.max(0, 100 - (colorDiff / Math.sqrt(3) * 100));
+
+      if (pixelSimilarity >= similarityThreshold) {
         similarPixels++;
         diffImageData.data[i] = r1;
         diffImageData.data[i + 1] = g1;
         diffImageData.data[i + 2] = b1;
-        diffImageData.data[i + 3] = 255;
+        diffImageData.data[i + 3] = 255; // Fully opaque
+        heatmapDataArray[i] = 0; // Green for similar pixels
+        heatmapDataArray[i + 1] = 255; // Green
+        heatmapDataArray[i + 2] = 0; // Green
+        heatmapDataArray[i + 3] = 255; // Fully opaque
       } else {
-        diffImageData.data[i] = 255;
+        diffImageData.data[i] = 255; // Red for different pixels
         diffImageData.data[i + 1] = 0;
         diffImageData.data[i + 2] = 0;
-        diffImageData.data[i + 3] = 128;
+        diffImageData.data[i + 3] = 128; // Semi-transparent
+        const heatValue = Math.min(255, colorDiff);
+        heatmapDataArray[i] = heatValue; // Blue for different pixels
+        heatmapDataArray[i + 1] = 0; // No green
+        heatmapDataArray[i + 2] = 255 - heatValue; // Blue gradient
+        heatmapDataArray[i + 3] = 255; // Fully opaque
       }
-
-      // Populate heatmap data array
-      const heatValue = Math.min(255, colorDiff);
-      heatmapDataArray[i] = heatValue;
-      heatmapDataArray[i + 1] = 0;
-      heatmapDataArray[i + 2] = 255 - heatValue;
-      heatmapDataArray[i + 3] = 255;
     }
 
     return { 
@@ -115,6 +113,28 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
       similarPixels, 
       heatmapData: heatmapDataArray 
     };
+  };
+
+  const HeatmapLegend = () => {
+    return (
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold mb-2">Heatmap Legend</h3>
+        <div className="flex space-x-4">
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-green-500 border border-black mr-2"></div>
+            <span>Similar Pixels</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-blue-500 border border-black mr-2"></div>
+            <span>Different Pixels</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-red-500 border border-black mr-2"></div>
+            <span>Significantly Different Pixels</span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -144,6 +164,7 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
       {similarity !== null && (
         <p className="text-lg">Similarity: {similarity}%</p>
       )}
+      <HeatmapLegend />
     </div>
   );
 }
