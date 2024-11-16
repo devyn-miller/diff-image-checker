@@ -124,18 +124,22 @@ export default function ImageComparison({ image1, image2, setDiffData }) {
     <div className="mb-4">
       <h2 className="text-xl font-bold mb-2">Image Comparison</h2>
       {warning && <p className="text-yellow-600 mb-2">{warning}</p>}
-      <div className="flex space-x-4 mb-4">
-        <TransformWrapper>
-          <TransformComponent>
-            <img src={image1} alt="Image 1" className="max-w-md" />
-          </TransformComponent>
-        </TransformWrapper>
-        <TransformWrapper>
-          <TransformComponent>
-            <img src={image2} alt="Image 2" className="max-w-md" />
-          </TransformComponent>
-        </TransformWrapper>
-      </div>
+      {image1 && image2 ? (
+        <div className="flex space-x-4 mb-4">
+          <TransformWrapper>
+            <TransformComponent>
+              <img src={image1} alt="Image 1" className="max-w-md" />
+            </TransformComponent>
+          </TransformWrapper>
+          <TransformWrapper>
+            <TransformComponent>
+              <img src={image2} alt="Image 2" className="max-w-md" />
+            </TransformComponent>
+          </TransformWrapper>
+        </div>
+      ) : (
+        <p className="text-gray-600">Please upload both images to compare.</p>
+      )}
       <div className="mb-4">
         <h3 className="text-lg font-semibold mb-2">Difference Overlay</h3>
         <TransformWrapper>

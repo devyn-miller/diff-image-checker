@@ -6,7 +6,7 @@ const HeatmapLegend = () => {
     <div className="mb-4">
       <h3 className="text-lg font-semibold mb-2">Heatmap Legend</h3>
       <div className="flex items-center mb-2">
-        <div className="w-16 h-4 border border-black mr-2" style={{
+        <div className="w-32 h-4 border border-black mr-2" style={{
           background: 'linear-gradient(to right, green, yellow, red)',
         }}></div>
         <span>Color Gradient</span>
