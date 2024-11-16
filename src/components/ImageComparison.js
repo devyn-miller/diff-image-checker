@@ -7,11 +7,12 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
   const canvasRef = useRef(null);
   const [similarity, setSimilarity] = useState(null);
   const [warning, setWarning] = useState('');
+  const [isSwapped, setIsSwapped] = useState(false);
 
   useEffect(() => {
     const compareImages = async () => {
-      const img1 = await loadImage(image1);
-      const img2 = await loadImage(image2);
+      const img1 = await loadImage(isSwapped ? image2 : image1);
+      const img2 = await loadImage(isSwapped ? image1 : image2);
 
       let width = Math.min(img1.width, img2.width);
       let height = Math.min(img1.height, img2.height);
@@ -50,7 +51,7 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
     if (image1 && image2) {
       compareImages();
     }
-  }, [image1, image2, sensitivity, setDiffData]);
+  }, [image1, image2, sensitivity, setDiffData, isSwapped]);
 
   const loadImage = (src) => {
     return new Promise((resolve) => {
@@ -83,7 +84,8 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
 
       const maxColorDiff = Math.sqrt(3 * Math.pow(255, 2));
       const similarityScore = 1 - (colorDiff / maxColorDiff);
-      totalSimilarityScore += similarityScore;
+
+      totalSimilarityScore += Math.max(similarityScore, 0) * (1 - sensitivity);
 
       if (similarityScore >= (0.5 - sensitivity)) {
         similarPixels++;
@@ -114,8 +116,12 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
       diffImageData, 
       similarPixels, 
       heatmapData: heatmapDataArray,
-      similarityPercentage: similarityPercentage.toFixed(2)
+      similarityPercentage: similarityPercentage >= 100 ? 100 : similarityPercentage.toFixed(2)
     };
+  };
+
+  const handleSwapImages = () => {
+    setIsSwapped(!isSwapped);
   };
 
   return (
@@ -123,22 +129,31 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
       <h2 className="text-xl font-bold mb-2">Image Comparison</h2>
       {warning && <p className="text-yellow-600 mb-2">{warning}</p>}
       {image1 && image2 ? (
-        <div className="flex space-x-4 mb-4">
+        <div className="flex space-x-2 mb-4">
           <TransformWrapper>
             <TransformComponent>
-              <img src={image1} alt="Image 1" className="max-w-md" />
+              <img src={isSwapped ? image2 : image1} alt="Image 1" className="max-w-xs" />
             </TransformComponent>
           </TransformWrapper>
           <TransformWrapper>
             <TransformComponent>
-              <img src={image2} alt="Image 2" className="max-w-md" />
+              <img src={isSwapped ? image1 : image2} alt="Image 2" className="max-w-xs" />
             </TransformComponent>
           </TransformWrapper>
         </div>
       ) : (
         <p className="text-gray-600">Please upload both images to compare.</p>
       )}
+      <button 
+        onClick={handleSwapImages} 
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
+      >
+        Swap Images
+      </button>
       <div className="mb-4">
+        <p className="text-sm text-gray-600 mb-2">
+          Note: The first image is the background (Image 1), and the second image is the foreground (Image 2) that is overlaid on top of the background.
+        </p>
         <h3 className="text-lg font-semibold mb-2">Difference Overlay</h3>
         <TransformWrapper>
           <TransformComponent>

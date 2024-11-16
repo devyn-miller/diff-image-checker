@@ -79,34 +79,41 @@ export default function DifferenceReport({ diffData, setSensitivity }) {
       >
         {showLogic ? 'Hide Similarity Calculation Logic' : 'Click to Show Similarity Calculation Logic'}
       </span>
-
+      
       {showLogic && (
         <div className="bg-gray-100 p-4 rounded shadow-md mb-4">
           <h3 className="text-lg font-semibold mb-2">Similarity Calculation Logic</h3>
           <p>
-            The similarity percentage is calculated using the following formula:
+            The similarity percentage is calculated using a formula that adjusts for the differences between the two images based on a sensitivity parameter.
           </p>
           <p className="font-bold">
-            Similarity Percentage = (Total Similarity Score / Total Pixels) * 100
+            Final Similarity = (Base Similarity × (1 - Sensitivity)) × 100
+          </p>
+          <p>Where Base Similarity is calculated as:</p>
+          <p className="font-bold">
+            Base Similarity = (Total Adjusted Similarity Score / Total Pixels)
           </p>
           <p>
-            Each pixel pair is assigned a similarity score between 0 and 1 based on the sensitivity setting:
+            For each pixel pair, the adjusted similarity score is calculated as:
           </p>
           <p className="font-bold">
-            Similarity Score = 1 - (Color Difference / Maximum Color Difference)
+            Adjusted Similarity Score = (1 - (Color Difference / Max Color Difference)) × (1 - Sensitivity)
           </p>
           <p>
-            The threshold for determining similar pixels is adjusted by the sensitivity:
+            The threshold for determining similar pixels uses the sensitivity:
           </p>
           <p className="font-bold">
-            If Similarity Score >= (0.5 - Sensitivity)
+            Pixel is Similar if: Adjusted Similarity Score ≥ (0.5 - Sensitivity)
           </p>
           <p>Where:</p>
           <ul className="list-disc list-inside">
-            <li><strong>Color Difference:</strong> Calculated using the Euclidean distance between the RGB values of the two pixels.</li>
-            <li><strong>Maximum Color Difference:</strong> The maximum possible distance between two colors in RGB space, approximately 441.67.</li>
-            <li><strong>Sensitivity:</strong> Adjusts the threshold for determining similar pixels. Higher sensitivity means more pixels are more likely to be considered different.</li>
+            <li><strong>Color Difference:</strong> The Euclidean distance between RGB values: √((R₁-R₂)² + (G₁-G₂)² + (B₁-B₂)²)</li>
+            <li><strong>Max Color Difference:</strong> The maximum possible distance between two colors in RGB space, approximately 441.67.</li>
+            <li><strong>Sensitivity:</strong> Adjusts the threshold for determining similar pixels. A higher sensitivity means more pixels are likely to be considered different.</li>
           </ul>
+          <p>
+            The similarity score indicates how closely the two images match. When you swap the images, the calculation remains the same, but the context of which image is treated as the background and which as the foreground changes, potentially affecting the similarity score.
+          </p>
         </div>
       )}
       
