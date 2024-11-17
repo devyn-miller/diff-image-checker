@@ -67,7 +67,7 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
     const diffImageData = new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
     const heatmapDataArray = new Uint8ClampedArray(width * height * 4);
     let similarPixels = 0;
-    let totalSimilarityScore = 0;
+    let totalAdjustedSimilarityScore = 0;
 
     for (let i = 0; i < imageData1.data.length; i += 4) {
       const r1 = imageData1.data[i];
@@ -82,19 +82,20 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
       );
 
       const maxColorDiff = Math.sqrt(3 * Math.pow(255, 2));
-      const similarityScore = 1 - (colorDiff / maxColorDiff);
-      
+      const baseSimilarityScore = 1 - (colorDiff / maxColorDiff);
+      const adjustedSimilarityScore = baseSimilarityScore * (1 - sensitivity);
+
       const threshold = 0.5 - sensitivity;
-      
-      if (similarityScore >= threshold) {
+
+      if (adjustedSimilarityScore >= threshold) {
         similarPixels++;
         diffImageData.data[i] = r1;
         diffImageData.data[i + 1] = g1;
         diffImageData.data[i + 2] = b1;
         diffImageData.data[i + 3] = 255;
 
-        const greenIntensity = Math.floor(255 * similarityScore);
-        const redIntensity = Math.floor(255 * (1 - similarityScore));
+        const greenIntensity = Math.floor(255 * (adjustedSimilarityScore - threshold) / (1 - threshold));
+        const redIntensity = Math.floor(255 * (1 - adjustedSimilarityScore));
         heatmapDataArray[i] = redIntensity;
         heatmapDataArray[i + 1] = greenIntensity;
         heatmapDataArray[i + 2] = 0;
@@ -105,17 +106,15 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
         diffImageData.data[i + 2] = 0;
         diffImageData.data[i + 3] = 128;
 
-        const redIntensity = 255;
-        const greenIntensity = Math.floor(255 * (similarityScore / threshold));
-        heatmapDataArray[i] = redIntensity;
-        heatmapDataArray[i + 1] = greenIntensity;
+        heatmapDataArray[i] = 255;
+        heatmapDataArray[i + 1] = 0;
         heatmapDataArray[i + 2] = 0;
         heatmapDataArray[i + 3] = 255;
       }
-      totalSimilarityScore += similarityScore;
+      totalAdjustedSimilarityScore += adjustedSimilarityScore;
     }
 
-    const similarityPercentage = (totalSimilarityScore / (width * height)) * 100;
+    const similarityPercentage = (totalAdjustedSimilarityScore / (width * height)) * 100;
 
     return {
       diffImageData,
@@ -134,22 +133,16 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
       <h2 className="text-xl font-bold mb-2">Image Comparison</h2>
       {warning && <p className="text-yellow-600 mb-2">{warning}</p>}
       {image1 && image2 ? (
-        <div className="flex space-x-2 mb-4">
+        <div className="flex space-x-4 mb-4">
           <div className="relative">
-            <TransformWrapper
-              minScale={1}
-              maxScale={3}
-            >
+            <TransformWrapper minScale={1} maxScale={3}>
               <TransformComponent>
                 <img src={isSwapped ? image2 : image1} alt="Image 1" className="max-w-xs" />
               </TransformComponent>
             </TransformWrapper>
           </div>
           <div className="relative">
-            <TransformWrapper
-              minScale={1}
-              maxScale={3}
-            >
+            <TransformWrapper minScale={1} maxScale={3}>
               <TransformComponent>
                 <img src={isSwapped ? image1 : image2} alt="Image 2" className="max-w-xs" />
               </TransformComponent>
@@ -162,12 +155,7 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
       <div className="mb-4">
         <h3 className="text-lg font-semibold mb-2">Difference Overlay</h3>
         <div className="relative">
-          <TransformWrapper
-            initialScale={1}
-            minScale={0.5}
-            maxScale={4}
-            doubleClick={{ disabled: true }}
-          >
+          <TransformWrapper initialScale={1} minScale={0.5} maxScale={4} doubleClick={{ disabled: true }}>
             <TransformComponent>
               <canvas ref={canvasRef} className="border" />
             </TransformComponent>

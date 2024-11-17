@@ -10,29 +10,27 @@ export default function ImageUploader({ setImage1, setImage2 }) {
         setImage(event.target.result);
       };
       reader.readAsDataURL(file);
-    } else {
-      alert('Please upload a PNG or JPEG image.');
     }
   };
 
   return (
-    <div className="flex space-x-4 mb-4">
+    <div className="grid grid-cols-2 gap-8 mb-4">
       <div>
-        <label className="block mb-2">Image 1:</label>
+        <h2 className="text-xl mb-2">Image 1:</h2>
         <input
           type="file"
           accept=".png,.jpg,.jpeg"
           onChange={(e) => handleImageUpload(e, setImage1)}
-          className="border p-2"
+          className="border p-2 w-full"
         />
       </div>
       <div>
-        <label className="block mb-2">Image 2:</label>
+        <h2 className="text-xl mb-2">Image 2:</h2>
         <input
           type="file"
           accept=".png,.jpg,.jpeg"
           onChange={(e) => handleImageUpload(e, setImage2)}
-          className="border p-2"
+          className="border p-2 w-full"
         />
       </div>
     </div>
