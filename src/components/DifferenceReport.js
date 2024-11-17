@@ -60,7 +60,7 @@ export default function DifferenceReport({ diffData, setSensitivity }) {
   return (
     <div className="w-full flex flex-col items-center space-y-6">
       <div className="w-full max-w-4xl">
-        <h2 className="text-2xl font-bold mb-4 text-center">Difference Overlay</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Difference Heatmap</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
@@ -89,7 +89,7 @@ export default function DifferenceReport({ diffData, setSensitivity }) {
               <div className="relative w-full">
                 <TransformWrapper initialScale={1} minScale={0.5} maxScale={4}>
                   <TransformComponent>
-                    <canvas ref={heatmapCanvasRef} className="border w-full" />
+                    <canvas ref={heatmapCanvasRef} className="border mx-auto" />
                   </TransformComponent>
                 </TransformWrapper>
               </div>
@@ -121,6 +121,7 @@ export default function DifferenceReport({ diffData, setSensitivity }) {
 
       {showLogic && (
         <div className="bg-gray-100 p-4 rounded w-3/4">
+          <h3 className="text-lg font-semibold mb-2 text-center">Difference Overlay</h3>
           <h3 className="text-lg font-semibold mb-2">Similarity Calculation Logic</h3>
           <p>
             The similarity percentage is calculated using a formula that adjusts for the differences between the two images based on a sensitivity parameter.

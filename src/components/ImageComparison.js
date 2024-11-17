@@ -130,7 +130,7 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
 
   return (
     <div className="relative mb-4">
-      <h2 className="text-xl font-bold mb-2">Image Comparison</h2>
+      <h2 className="text-lg font-semibold mb-2 text-center">Image Comparison</h2>
       {warning && <p className="text-yellow-600 mb-2">{warning}</p>}
       {image1 && image2 ? (
         <div className="flex space-x-4 mb-4">
@@ -153,7 +153,7 @@ export default function ImageComparison({ image1, image2, setDiffData, sensitivi
         <p className="text-gray-600">Please upload both images to compare.</p>
       )}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-2">Difference Overlay</h3>
+        <h3 className="text-lg font-semibold mb-2 text-center">Difference Overlay</h3>
         <div className="relative">
           <TransformWrapper initialScale={1} minScale={0.5} maxScale={4} doubleClick={{ disabled: true }}>
             <TransformComponent>
